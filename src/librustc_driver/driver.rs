@@ -380,11 +380,12 @@ impl<'a, 'b, 'ast, 'tcx> CompileState<'a, 'b, 'ast, 'tcx> {
                          krate: ast::Crate,
                          cstore: &'a CStore)
                          -> CompileState<'a, 'b, 'ast, 'tcx> {
-        let cloned_span = krate.span;
         CompileState {
+            //Registry initialization should go before the krate initialization
+            //because krate: Some(krate) needs move.
+            registry: Some(Registry::new(&session, krate.span)),
             krate: Some(krate),
             cstore: Some(cstore),
-            registry: Some(Registry::new(&session, cloned_span)),
             out_file: out_file.as_ref().map(|s| &**s),
             ..CompileState::empty(input, session, out_dir)
         }
