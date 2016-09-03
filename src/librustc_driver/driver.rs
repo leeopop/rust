@@ -97,7 +97,7 @@ pub fn compile_input(sess: &Session,
             }
         };
 
-        let (krate,registry) = {
+        let (krate, registry) = {
             let mut compile_state = CompileState::state_after_parse(input,
                                                                     sess,
                                                                     outdir,
@@ -109,7 +109,7 @@ pub fn compile_input(sess: &Session,
                                     compile_state,
                                     Ok(()));
 
-            (compile_state.krate.unwrap(), compile_state.registry.unwrap())
+            (compile_state.krate.unwrap(), compile_state.registry)
         };
 
         let outputs = build_output_filenames(input, outdir, output, &krate.attrs, sess);
@@ -380,7 +380,7 @@ impl<'a, 'b, 'ast, 'tcx> CompileState<'a, 'b, 'ast, 'tcx> {
                          krate: ast::Crate,
                          cstore: &'a CStore)
                          -> CompileState<'a, 'b, 'ast, 'tcx> {
-        let cloned_span = krate.span.clone();
+        let cloned_span = krate.span;
         CompileState {
             krate: Some(krate),
             cstore: Some(cstore),
@@ -549,7 +549,7 @@ pub struct ExpansionResult<'a> {
 pub fn phase_2_configure_and_expand<'a, F>(sess: &Session,
                                            cstore: &CStore,
                                            mut krate: ast::Crate,
-                                           mut registry: Registry,
+                                           registry: Option<Registry>,
                                            crate_name: &'a str,
                                            addl_plugins: Option<Vec<String>>,
                                            make_glob_map: MakeGlobMap,
@@ -597,7 +597,7 @@ pub fn phase_2_configure_and_expand<'a, F>(sess: &Session,
                                    addl_plugins.take().unwrap())
     });
 
-    registry.krate_span = krate.span;
+    let mut registry = registry.unwrap_or(Registry::new(sess, krate.span));
 
     time(time_passes, "plugin registration", || {
         if sess.features.borrow().rustc_diagnostic_macros {
