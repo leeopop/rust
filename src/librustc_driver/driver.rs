@@ -381,8 +381,7 @@ impl<'a, 'b, 'ast, 'tcx> CompileState<'a, 'b, 'ast, 'tcx> {
                          cstore: &'a CStore)
                          -> CompileState<'a, 'b, 'ast, 'tcx> {
         CompileState {
-            //Registry initialization should go before the krate initialization
-            //because krate: Some(krate) needs move.
+            // Initialize the registry before moving `krate`
             registry: Some(Registry::new(&session, krate.span)),
             krate: Some(krate),
             cstore: Some(cstore),
